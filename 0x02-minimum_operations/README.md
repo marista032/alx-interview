@@ -1,0 +1,1 @@
+This project is an ALX interview question to write a method that calculates the fewest number of operations needed to result in exactly n H characters in the file. The Prototype should be def minOperations(n), it should returns an integer If n is impossible to achieve, return 0.
