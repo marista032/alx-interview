@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-This is the main file that can be used to test the code
+Main file for testing
 """
 
 minOperations = __import__('0-minoperations').minOperations
