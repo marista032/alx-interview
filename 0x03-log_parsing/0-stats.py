@@ -1,45 +1,50 @@
 #!/usr/bin/python3
-""" this script is to be able to read stdin line by line and computes metrics """
+""" this script reads stdin line by line and computes metrics
+"""
+
+
 import sys
 
 
-if __name__ == "__main__":
-    status = {"200": 0,
-              "301": 0,
-              "400": 0,
-              "401": 0,
-              "403": 0,
-              "404": 0,
-              "405": 0,
-              "500": 0}
-    count = 1
-    file_size = 0
+status_codes_dict = {'200': 0, '301': 0, '400': 0, '401': 0, '403': 0,
+                     '404': 0, '405': 0, '500': 0}
 
-    def get_line(line):
-        """ this line should read parse and grab data"""
-        try:
-            parsed_line = line.split()
-            status_code = parsed_line[-2]
-            if status_code in status.keys():
-                status[status_code] += 1
-            return int(parsed_line[-1])
-        except Exception:
-            return 0
+total_size = 0
+count = 0
 
-    def print_stats():
-        """print stats"""
-        print("File size: {}".format(file_size))
-        for key in sorted(status.keys()):
-            if status[key]:
-                print("{}: {}".format(key, status[key]))
+try:
+    for line in sys.stdin:
+        line_list = line.split(" ")
 
-    try:
-        for line in sys.stdin:
-            file_size += get_line(line)
-            if count % 10 == 0:
-                print_stats()
+        if len(line_list) > 4:
+            status_code = line_list[-2]
+            file_size = int(line_list[-1])
+
+            ''' to check if the status code receive exists in the dictionary and show the
+            increment in its count '''
+            if status_code in status_codes_dict.keys():
+                status_codes_dict[status_code] += 1
+
+            # update total size
+            total_size += file_size
+
+            # update count of lines
             count += 1
-    except KeyboardInterrupt:
-        print_stats()
-        raise
-    print_stats()
+
+        if count == 10:
+            count = 0  # reset count
+            print('File size: {}'.format(total_size))
+
+            for key, value in sorted(status_codes_dict.items()):
+                if value != 0:
+                    print('{}: {}'.format(key, value))
+
+except Exception as err:
+    pass
+
+finally:
+    print('File size: {}'.format(total_size))
+    for key, value in sorted(status_codes_dict.items()):
+        if value != 0:
+            print('{}: {}'.format(key, value))
+
