@@ -1,77 +1,102 @@
 #!/usr/bin/python3
-""" this script is based on the N queens puzzle"""
+
 import sys
 
 
-def isSafe(board, row, col, n):
-    """Cross-check if a queen can be placed on board[row][col]"""
-    for i in range(col):
-        if board[row][i] == 1:
+def is_safe(board, row, col, N):
+    """
+    Cross-check the best safe position to place a queen on a chessboard
+
+    Parameters:
+        board (list[list[int]]): The current state of the chessboard.
+        row (int): The row index where we want to place the queen.
+        col (int): The column index where we want to place the queen.
+        N (int): The size of the chessboard.
+
+    Returns:
+        bool: True if placing a queen is safe, False otherwise.
+    """
+    # Determine if there is any queen in the same column
+    for i in range(row):
+        if board[i][col] == 1:
             return False
 
-    i, j = row, col
-    while i >= 0 and j >= 0:
+    # Check the upper left diagonal
+    for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
         if board[i][j] == 1:
             return False
-        i -= 1
-        j -= 1
 
-    i, j = row, col
-    while i < n and j >= 0:
+    # Check the upper right diagonal
+    for i, j in zip(range(row-1, -1, -1), range(col+1, N)):
         if board[i][j] == 1:
             return False
-        i += 1
-        j -= 1
 
     return True
 
 
-def solveNQUtil(board, col, n, solutions):
-    """ This is a recursive utility function is used to solve the N Queen problem"""
-    if col == n:
-        solution = []
-        for i in range(n):
-            for j in range(n):
-                if board[i][j] == 1:
-                    solution.append([i, j])
-        solutions.append(solution)
-        return True
+def nqueens_util(board, row, N, solutions):
+    """
+    This recursive utility function is to find all possible solutions for \
+        the N Queens problem.
 
-    res = False
-    for i in range(n):
-        if isSafe(board, i, col, n):
-            board[i][col] = 1
-            res = solveNQUtil(board, col + 1, n, solutions) or res
-            board[i][col] = 0  # BACKTRACK
+    Parameters:
+        board (list[list[int]]): The current state of the chessboard.
+        row (int): The current row being considered for queen placement.
+        N (int): The size of the chessboard.
+        solutions (list[list[int]]): List to store all found solutions.
 
-    return res
+    Returns:
+        None
+    """
+    if row == N:
+        # A solution is found when the queens are placed in all rows.
+        solutions.append(
+            [[i, j] for i in range(N) for j in range(N) if board[i][j] == 1])
+    else:
+        for col in range(N):
+            if is_safe(board, row, col, N):
+                # Place the queen and call the function recursively for the\
+                # next row.
+                board[row][col] = 1
+                nqueens_util(board, row+1, N, solutions)
+                # Backtrack and remove the queen from the current position.
+                board[row][col] = 0
 
 
-def solveNQ(n):
-    """This function solves the N Queen problem using Backtracking"""
-    board = [[0 for _ in range(n)] for _ in range(n)]
+def nqueens(N):
+    """
+    Find and print all possible solutions for the N Queens problem.
+
+    Parameters:
+        N (int): The size of the chessboard.
+
+    Returns:
+        None
+    """
+    if not isinstance(N, int):
+        print("N must be a number")
+        sys.exit(1)
+
+    if N < 4:
+        print("N must be at least 4")
+        sys.exit(1)
+
+    board = [[0 for _ in range(N)] for _ in range(N)]
     solutions = []
-    solveNQUtil(board, 0, n, solutions)
+    nqueens_util(board, 0, N, solutions)
 
-    # Sort the solutions before printing them
-    solutions.sort()
     for solution in solutions:
         print(solution)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: nqueens N")
         sys.exit(1)
 
     try:
-        n = int(sys.argv[1])
+        N = int(sys.argv[1])
+        nqueens(N)
     except ValueError:
         print("N must be a number")
         sys.exit(1)
-
-    if n < 4:
-        print("N must be at least 4")
-        sys.exit(1)
-
-    solveNQ(n)
